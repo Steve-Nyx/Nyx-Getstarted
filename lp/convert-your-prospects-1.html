@@ -614,7 +614,10 @@ document.getElementById('modalClose').addEventListener('click', closeModal);
 overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-document.getElementById('modalSubmit').addEventListener('click', () => {
+const SUPA_URL = 'https://rdaktinimmueyxkbktgu.supabase.co';
+const SUPA_KEY = 'sb_publishable_eS3HZ78indzHveMkhF4lxA_V-TURrlA';
+
+document.getElementById('modalSubmit').addEventListener('click', async () => {
   const gym = document.getElementById('f-gym').value.trim();
   const first = document.getElementById('f-first').value.trim();
   const last = document.getElementById('f-last').value.trim();
@@ -624,6 +627,35 @@ document.getElementById('modalSubmit').addEventListener('click', () => {
     document.getElementById(first ? 'f-email' : 'f-first').style.borderColor = '#ff5252';
     return;
   }
+
+  const btn = document.getElementById('modalSubmit');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  try {
+    await fetch(`${SUPA_URL}/rest/v1/getstarted_demo_requests`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': `Bearer ${SUPA_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        gym_name: gym,
+        first_name: first,
+        last_name: last,
+        email: email,
+        comments: comments,
+        page_source: window.location.href
+      })
+    });
+  } catch(e) {
+    console.error('Supabase insert failed:', e);
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Send Request';
   modalForm.style.display = 'none';
   modalSuccess.style.display = 'block';
 });

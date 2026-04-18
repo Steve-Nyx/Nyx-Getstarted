@@ -724,6 +724,8 @@ const state = {
    }
    ============================================================ */
 const WEBHOOK_URL = null; // e.g. 'https://hooks.zapier.com/...'
+const SUPA_URL = 'https://rdaktinimmueyxkbktgu.supabase.co';
+const SUPA_KEY = 'sb_publishable_eS3HZ78indzHveMkhF4lxA_V-TURrlA';
 
 /* ============================================================
    UI WIRING
@@ -1340,20 +1342,33 @@ function submitContactForm() {
     submitBtn.textContent = state.currentCTA === 'demo' ? 'Send Request' : 'Start My Trial';
   };
 
-  if (WEBHOOK_URL) {
-    fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+  fetch(`${SUPA_URL}/rest/v1/getstarted_benchmark_survey`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': `Bearer ${SUPA_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify({
+      gym_name: state.gymName,
+      total_active_members: state.members != null ? String(state.members) : null,
+      average_monthly_price: state.price != null ? String(state.price) : null,
+      leads_per_month: state.leads != null ? String(state.leads) : null,
+      speed_to_lead: state.speed != null ? String(state.speed) : null,
+      lead_to_trial_rate: state.book != null ? String(state.book) : null,
+      trial_to_member_rate: state.conv != null ? String(state.conv) : null,
+      monthly_churn_rate: state.churn != null ? String(state.churn) : null,
+      seven_day_engagement: state.eng != null ? String(state.eng) : null,
+      weekly_staff_hours: state.hours != null ? String(state.hours) : null,
+      page_source: window.location.href
     })
-    .then(() => finish())
-    .catch(err => {
-      console.error('Lead submission failed:', err);
-      finish(); // still show confirmation — we don't want user to retry
-    });
-  } else {
-    setTimeout(finish, 400); // fake network delay for feel
-  }
+  })
+  .then(() => finish())
+  .catch(err => {
+    console.error('Supabase insert failed:', err);
+    finish();
+  });
 }
 </script>
 </body>
