@@ -1342,28 +1342,44 @@ function submitContactForm() {
     submitBtn.textContent = state.currentCTA === 'demo' ? 'Send Request' : 'Start My Trial';
   };
 
-  fetch(`${SUPA_URL}/rest/v1/getstarted_benchmark_survey`, {
-    method: 'POST',
-    headers: {
-      'apikey': SUPA_KEY,
-      'Authorization': `Bearer ${SUPA_KEY}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=minimal'
-    },
-    body: JSON.stringify({
-      gym_name: state.gymName,
-      total_active_members: state.members != null ? String(state.members) : null,
-      average_monthly_price: state.price != null ? String(state.price) : null,
-      leads_per_month: state.leads != null ? String(state.leads) : null,
-      speed_to_lead: state.speed != null ? String(state.speed) : null,
-      lead_to_trial_rate: state.book != null ? String(state.book) : null,
-      trial_to_member_rate: state.conv != null ? String(state.conv) : null,
-      monthly_churn_rate: state.churn != null ? String(state.churn) : null,
-      seven_day_engagement: state.eng != null ? String(state.eng) : null,
-      weekly_staff_hours: state.hours != null ? String(state.hours) : null,
-      page_source: window.location.href
+  const requestType = state.currentCTA === 'demo' ? 'Request a 15 min demo' : 'Start a free GROW trial';
+
+  const supaHeaders = {
+    'apikey': SUPA_KEY,
+    'Authorization': `Bearer ${SUPA_KEY}`,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=minimal'
+  };
+
+  Promise.all([
+    fetch(`${SUPA_URL}/rest/v1/getstarted_benchmark_survey`, {
+      method: 'POST',
+      headers: supaHeaders,
+      body: JSON.stringify({
+        gym_name: state.gymName,
+        total_active_members: state.members != null ? String(state.members) : null,
+        average_monthly_price: state.price != null ? String(state.price) : null,
+        leads_per_month: state.leads != null ? String(state.leads) : null,
+        speed_to_lead: state.speed != null ? String(state.speed) : null,
+        lead_to_trial_rate: state.book != null ? String(state.book) : null,
+        trial_to_member_rate: state.conv != null ? String(state.conv) : null,
+        monthly_churn_rate: state.churn != null ? String(state.churn) : null,
+        seven_day_engagement: state.eng != null ? String(state.eng) : null,
+        weekly_staff_hours: state.hours != null ? String(state.hours) : null,
+        page_source: window.location.href
+      })
+    }),
+    fetch(`${SUPA_URL}/rest/v1/getstarted_benchmark_requests`, {
+      method: 'POST',
+      headers: supaHeaders,
+      body: JSON.stringify({
+        name: name,
+        email: email,
+        gym_name: gymName,
+        request_type: requestType
+      })
     })
-  })
+  ])
   .then(() => finish())
   .catch(err => {
     console.error('Supabase insert failed:', err);
